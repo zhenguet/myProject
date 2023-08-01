@@ -3,6 +3,8 @@ const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { MongoClient, ObjectId } = require("mongodb");
+const https = require("https");
+const fs = require("fs");
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -94,6 +96,17 @@ function authenticateToken(req, res, next) {
     });
 }
 
-app.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+// app.listen(port, () => {
+//     console.log(`Server is running on http://localhost:${port}`);
+// });
+
+// Đường dẫn đến chứng chỉ SSL
+const privateKey = fs.readFileSync("./sslcert/key.pem", "utf8");
+const certificate = fs.readFileSync("./sslcert/cert.pem", "utf8");
+const credentials = { key: privateKey, cert: certificate };
+
+const httpsServer = https.createServer(credentials, app);
+
+httpsServer.listen(port, () => {
+    console.log(`Server is running on https://localhost:${port}`);
 });
