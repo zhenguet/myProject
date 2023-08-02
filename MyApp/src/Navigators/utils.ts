@@ -43,3 +43,9 @@ export function navigateAndSimpleReset(name: string, index = 0) {
     )
   }
 }
+
+export function goBack() {
+  if (navigationRef.isReady()) {
+    navigationRef.goBack()
+  }
+}

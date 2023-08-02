@@ -1,22 +1,40 @@
+import {
+  BottomSheet,
+  Duolingo,
+  Example,
+  HandlingContinuous,
+  HandlingGesture,
+  InvertedFlatListExample,
+  Slider,
+  SpringBox,
+  Switch,
+  TimingBox,
+  WobbleExample,
+} from '@/Containers'
+import { createStackNavigator } from '@react-navigation/stack'
 import React from 'react'
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { ExampleContainer } from '@/Containers'
 
-const Tab = createBottomTabNavigator()
+const Stack = createStackNavigator()
 
 // @refresh reset
 const MainNavigator = () => {
   return (
-    <Tab.Navigator>
-      <Tab.Screen
-        name="Home"
-        component={ExampleContainer}
-        options={{
-          tabBarIconStyle: { display: 'none' },
-          tabBarLabelPosition: 'beside-icon',
-        }}
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="Home" component={Example} />
+      <Stack.Screen name="SpringBox" component={SpringBox} />
+      <Stack.Screen name="TimingBox" component={TimingBox} />
+      <Stack.Screen name="WobbleExample" component={WobbleExample} />
+      <Stack.Screen name="HandlingGesture" component={HandlingGesture} />
+      <Stack.Screen name="HandlingContinuous" component={HandlingContinuous} />
+      <Stack.Screen
+        name="InvertedFlatListExample"
+        component={InvertedFlatListExample}
       />
-    </Tab.Navigator>
+      <Stack.Screen name="Slider" component={Slider} />
+      <Stack.Screen name="Switch" component={Switch} />
+      <Stack.Screen name="Duolingo" component={Duolingo} />
+      <Stack.Screen name="BottomSheet" component={BottomSheet} />
+    </Stack.Navigator>
   )
 }
 

@@ -6,7 +6,7 @@ import { Brand } from '@/Components'
 import { setDefaultTheme } from '@/Store/Theme'
 import { navigateAndSimpleReset } from '@/Navigators/utils'
 
-const StartupContainer = () => {
+const Startup = () => {
   const { Layout, Gutters, Fonts } = useTheme()
 
   const { t } = useTranslation()
@@ -34,4 +34,4 @@ const StartupContainer = () => {
   )
 }
 
-export default StartupContainer
+export default Startup
