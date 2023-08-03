@@ -1,6 +1,7 @@
 import {
   Bedtime,
   BottomSheet,
+  Clock,
   Countdown,
   Duolingo,
   Example,
@@ -38,6 +39,7 @@ const MainNavigator = () => {
       <Stack.Screen name="BottomSheet" component={BottomSheet} />
       <Stack.Screen name="Countdown" component={Countdown} />
       <Stack.Screen name="Bedtime" component={Bedtime} />
+      <Stack.Screen name="Clock" component={Clock} />
     </Stack.Navigator>
   )
 }

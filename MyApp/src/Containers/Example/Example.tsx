@@ -42,6 +42,9 @@ const data: Array<dataType> = [
   {
     screenName: 'Bedtime',
   },
+  {
+    screenName: 'Clock',
+  },
 ]
 
 const Example = (props: any) => {
@@ -56,7 +59,6 @@ const Example = (props: any) => {
           style={styles.button}
           onPress={() => {
             navigation.navigate(item.screenName)
-            console.log(item.screenName)
           }}
         >
           <Text style={{ textAlign: 'center' }}>{item.screenName}</Text>
