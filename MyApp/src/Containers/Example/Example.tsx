@@ -1,9 +1,9 @@
-import React from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import React from 'react'
+import { FlatList, StyleSheet, Text, TouchableOpacity } from 'react-native'
 
 type dataType = {
-  screenName: string;
-};
+  screenName: string
+}
 
 const data: Array<dataType> = [
   {
@@ -36,10 +36,16 @@ const data: Array<dataType> = [
   {
     screenName: 'BottomSheet',
   },
-];
+  {
+    screenName: 'Countdown',
+  },
+  {
+    screenName: 'Bedtime',
+  },
+]
 
 const Example = (props: any) => {
-  const { navigation } = props;
+  const { navigation } = props
 
   return (
     <FlatList
@@ -49,7 +55,7 @@ const Example = (props: any) => {
         <TouchableOpacity
           style={styles.button}
           onPress={() => {
-            navigation.navigate(item.screenName);
+            navigation.navigate(item.screenName)
             console.log(item.screenName)
           }}
         >
@@ -57,10 +63,10 @@ const Example = (props: any) => {
         </TouchableOpacity>
       )}
     />
-  );
-};
+  )
+}
 
-export default Example;
+export default Example
 
 const styles = StyleSheet.create({
   button: {
@@ -71,4 +77,4 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     backgroundColor: '#D7F0FA',
   },
-});
+})
