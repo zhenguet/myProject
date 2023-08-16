@@ -15,6 +15,7 @@ import { ThemeVariables } from './theme'
  */
 
 type Margins =
+  | 'Margin'
   | 'BMargin'
   | 'TMargin'
   | 'RMargin'
@@ -22,6 +23,7 @@ type Margins =
   | 'VMargin'
   | 'HMargin'
 type Paddings =
+  | 'Padding'
   | 'BPadding'
   | 'TPadding'
   | 'RPadding'
@@ -44,6 +46,9 @@ export default function ({ MetricsSizes }: ThemeVariables): Gutters {
       (acc, [key, value]) => ({
         ...acc,
         /* Margins */
+        [`${key}Margin`]: {
+          margin: value,
+        },
         [`${key}BMargin`]: {
           marginBottom: value,
         },
@@ -63,6 +68,9 @@ export default function ({ MetricsSizes }: ThemeVariables): Gutters {
           marginHorizontal: value,
         },
         /* Paddings */
+        [`${key}Padding`]: {
+          padding: value,
+        },
         [`${key}BPadding`]: {
           paddingBottom: value,
         },

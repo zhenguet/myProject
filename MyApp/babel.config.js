@@ -12,7 +12,10 @@ plugins.push(
       },
     },
   ],
-  'react-native-reanimated/plugin',
+  [
+    'react-native-reanimated/plugin',
+    { globals: ['__scanQRCodes', '__decode'] },
+  ],
 )
 
 module.exports = {
