@@ -23,7 +23,7 @@ import {
   TextResult,
   decode,
 } from 'vision-camera-dynamsoft-barcode-reader'
-import { ScannerRectView } from './ScannerRectView'
+import { ScannerRectView } from './ScannerRectView2'
 import { goBack } from '@/Navigators/utils'
 import { useTheme } from '@/Hooks'
 
