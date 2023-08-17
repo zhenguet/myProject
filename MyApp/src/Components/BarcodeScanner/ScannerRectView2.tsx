@@ -1,38 +1,21 @@
-import React, { useEffect, useState } from 'react'
-import {
-  Animated,
+import React, { useEffect } from 'react'
+import { StyleProp, StyleSheet, View, ViewStyle } from 'react-native'
+import Animated, {
   Easing,
-  StyleProp,
-  StyleSheet,
-  View,
-  ViewStyle,
-} from 'react-native'
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withTiming,
+  withRepeat,
+  useDerivedValue,
+} from 'react-native-reanimated'
 
-const defaultRectStyle = {
-  height: 200,
-  width: 200,
-  borderWidth: 0,
-  borderColor: '#000000',
-  marginBottom: 0,
-}
 const defaultCornerStyle = {
   height: 32,
   width: 32,
   borderWidth: 8,
   borderColor: '#1A6DD5',
 }
-const defaultScanBarStyle = {
-  marginHorizontal: 8,
-  borderRadius: 2,
-  backgroundColor: '#1A6DD5',
-}
-const defaultHintTextStyle = {
-  color: '#fff',
-  fontSize: 14,
-  backgroundColor: 'transparent',
-  marginTop: 32,
-}
-
 interface IScannerRectView {
   maskColor?: string
   rectStyle?: StyleProp<ViewStyle> | undefined
@@ -48,76 +31,33 @@ interface IScannerRectView {
   scanBarStyle?: StyleProp<ViewStyle> | undefined
 
   hintText?: string
-  hintTextStyle?: StyleProp<ViewStyle> | undefined
 }
 
 export function ScannerRectView(props: IScannerRectView) {
-  const {
-    cornerOffsetSize,
-    isShowScanBar,
-    rectStyle,
-    cornerStyle,
-    scanBarStyle,
-    hintTextStyle,
-    scanBarAnimateTime,
-  } = props
-
-  const innerRectStyle: any = Object.assign(defaultRectStyle, rectStyle)
-  const innerCornerStyle: any = Object.assign(defaultCornerStyle, cornerStyle)
-  const innerScanBarStyle: any = Object.assign(
-    defaultScanBarStyle,
-    scanBarStyle,
-  )
-  const innerHintTextStyle: any = Object.assign(
-    defaultHintTextStyle,
-    hintTextStyle,
-  )
-  const animatedValue = new Animated.Value(0)
-  const animatedStyle = {
-    transform: [{ translateY: animatedValue }],
+  const progress = useSharedValue(0)
+  const animationConfig = {
+    duration: 3000,
+    easing: Easing.linear,
   }
 
   useEffect(() => {
-    scanBarMove()
+    progress.value = withRepeat(withTiming(200, animationConfig), -1)
   }, [])
 
-  const scanBarMove = () => {
-    const scanBarHeight = isShowScanBar ? innerScanBarStyle.height || 4 : 0
-    const startValue = innerCornerStyle.borderWidth
-    const endValue =
-      innerRectStyle.height -
-      (innerRectStyle.borderWidth +
-        cornerOffsetSize +
-        innerCornerStyle.borderWidth) -
-      scanBarHeight
+  const translateY = useDerivedValue(() => {
+    return withTiming(progress.value)
+  })
 
-    Animated.loop(
-      Animated.sequence([
-        Animated.timing(animatedValue, {
-          toValue: endValue,
-          duration: scanBarAnimateTime,
-          easing: Easing.linear,
-          isInteraction: false,
-          useNativeDriver: true,
-        }),
-        Animated.timing(animatedValue, {
-          toValue: startValue,
-          duration: scanBarAnimateTime,
-          easing: Easing.linear,
-          isInteraction: false,
-          useNativeDriver: true,
-        }),
-      ]),
-      {
-        iterations: 4,
-      },
-    ).start(() => scanBarMove())
-  }
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: translateY.value }],
+    }
+  })
 
   return (
     <View style={[styles.container, { bottom: 0 }]}>
       <Animated.View style={[animatedStyle]}>
-        <View style={[{ height: 4 }, innerScanBarStyle]} />
+        <View style={[{ height: 4 }, styles.scanBarStyle]} />
       </Animated.View>
       <View style={styles.topLeftCorner} />
       <View style={styles.topRightCorner} />
@@ -157,6 +97,11 @@ const styles = StyleSheet.create({
   viewfinder: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  scanBarStyle: {
+    marginHorizontal: 8,
+    borderRadius: 2,
+    backgroundColor: '#1A6DD5',
   },
   topLeftCorner: {
     ...defaultCornerStyle,
