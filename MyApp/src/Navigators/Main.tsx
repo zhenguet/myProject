@@ -15,6 +15,7 @@ import {
   TimingBox,
   WobbleExample,
 } from '@/Containers'
+import CircleProcess from '@/Containers/Animation/CircleProcess'
 import { createStackNavigator } from '@react-navigation/stack'
 import React from 'react'
 
@@ -42,6 +43,7 @@ const MainNavigator = () => {
       <Stack.Screen name="Bedtime" component={Bedtime} />
       <Stack.Screen name="Clock" component={Clock} />
       <Stack.Screen name="Camera" component={Camera} />
+      <Stack.Screen name="CircleProcess" component={CircleProcess} />
     </Stack.Navigator>
   )
 }

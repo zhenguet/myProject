@@ -44,8 +44,12 @@ const data: Array<dataType> = [
   },
   {
     screenName: 'Clock',
-  },{
+  },
+  {
     screenName: 'Camera',
+  },
+  {
+    screenName: 'CircleProcess',
   },
 ]
 
