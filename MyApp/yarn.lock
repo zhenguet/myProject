@@ -7760,6 +7760,11 @@ vision-camera-dynamsoft-barcode-reader@^0.6.0:
   resolved "https://registry.yarnpkg.com/vision-camera-dynamsoft-barcode-reader/-/vision-camera-dynamsoft-barcode-reader-0.6.0.tgz#19eb32e407ddf18ae3b29edd414ac2c0a6509349"
   integrity sha512-noJphbhZ/qRO4Pt3oUSVABmiTmTgBmmnkfyvU09Ppi3HaqghsZ1CpOOT3scBI0Sc9RIjLP8gm8kfYRUT7+cSXA==
 
+vision-camera-face-detector@^0.1.8:
+  version "0.1.8"
+  resolved "https://registry.yarnpkg.com/vision-camera-face-detector/-/vision-camera-face-detector-0.1.8.tgz#5a20d19999ec9127cd7da6290d5453f30f653070"
+  integrity sha512-nlfOMjuHQF66gI162ZCSnmXbinYqNA0+NPzmjZxUwXPOAQidNqLERC8W9LBXhbnIJyMmflMT9X1utpF1D0TlAg==
+
 vlq@^1.0.0:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/vlq/-/vlq-1.0.1.tgz#c003f6e7c0b4c1edd623fd6ee50bbc0d6a1de468"

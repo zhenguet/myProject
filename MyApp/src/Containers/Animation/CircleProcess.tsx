@@ -98,6 +98,7 @@ const styles = StyleSheet.create({
     color: 'rgba(256,256,256,0.7)',
     width: 200,
     textAlign: 'center',
+    zIndex: 9,
   },
   button: {
     position: 'absolute',
