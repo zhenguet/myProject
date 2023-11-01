@@ -1,12 +1,11 @@
-import React, { ReactElement } from "react";
+import React, { ReactElement } from 'react';
 import Animated, {
   useAnimatedRef,
   useAnimatedScrollHandler,
   useSharedValue,
-} from "react-native-reanimated";
-
-import Item from "./Item";
-import { COL, Positions, SIZE } from "./Config";
+} from 'react-native-reanimated';
+import Item from './Item';
+import { COL, Positions, SIZE } from './Config';
 
 interface ListProps {
   children: ReactElement<{ id: string }>[];
@@ -20,8 +19,8 @@ const List = ({ children, editing, onDragEnd }: ListProps) => {
   const positions = useSharedValue<Positions>(
     Object.assign(
       {},
-      ...children.map((child, index) => ({ [child.props.id]: index }))
-    )
+      ...children.map((child, index) => ({ [child.props.id]: index })),
+    ),
   );
   const onScroll = useAnimatedScrollHandler({
     onScroll: ({ contentOffset: { y } }) => {
@@ -40,7 +39,7 @@ const List = ({ children, editing, onDragEnd }: ListProps) => {
       bounces={false}
       scrollEventThrottle={16}
     >
-      {children.map((child) => {
+      {children.map(child => {
         return (
           <Item
             key={child.props.id}
