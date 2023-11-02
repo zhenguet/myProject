@@ -83,10 +83,12 @@ const Item = ({
       translateX.value = ctx.x + translationX;
       translateY.value = ctx.y + translationY;
       // 1. We calculate where the tile should be
-      const newOrder = getOrder(
-        translateX.value,
-        translateY.value,
-        Object.keys(positions.value).length - 1,
+      const newOrder = Math.fround(
+        getOrder(
+          translateX.value,
+          translateY.value,
+          Object.keys(positions.value).length - 1,
+        ),
       );
 
       // 2. We swap the positions
