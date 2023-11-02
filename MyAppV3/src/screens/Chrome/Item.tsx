@@ -31,7 +31,7 @@ interface ItemProps {
   positions: Animated.SharedValue<Positions>;
   id: string;
   editing: boolean;
-  setEditting: any;
+  setEditing: any;
   onDragEnd: (diffs: Positions) => void;
   scrollView: RefObject<Animated.ScrollView>;
   scrollY: Animated.SharedValue<number>;
@@ -45,7 +45,7 @@ const Item = ({
   scrollView,
   scrollY,
   editing,
-  setEditting,
+  setEditing,
 }: ItemProps) => {
   const inset = useSafeAreaInsets();
   const containerHeight =
@@ -132,7 +132,7 @@ const Item = ({
         runOnJS(onDragEnd)(positions.value);
       });
       translateY.value = withTiming(newPosition.y, animationConfig);
-      runOnJS(setEditting)(false);
+      runOnJS(setEditing)(false);
     },
   });
   const style = useAnimatedStyle(() => {
@@ -153,7 +153,7 @@ const Item = ({
     };
   });
   return (
-    <TouchableOpacity onLongPress={() => setEditting(true)}>
+    <TouchableOpacity onLongPress={() => setEditing(true)}>
       <Animated.View style={style}>
         <PanGestureHandler enabled={editing} onGestureEvent={onGestureEvent}>
           <Animated.View style={StyleSheet.absoluteFill}>

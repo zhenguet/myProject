@@ -10,11 +10,11 @@ import { COL, Positions, SIZE } from './Config';
 interface ListProps {
   children: ReactElement<{ id: string }>[];
   editing: boolean;
-  setEditting: any;
+  setEditing: any;
   onDragEnd: (diff: Positions) => void;
 }
 
-const List = ({ children, editing, setEditting, onDragEnd }: ListProps) => {
+const List = ({ children, editing, setEditing, onDragEnd }: ListProps) => {
   const scrollY = useSharedValue(0);
   const scrollView = useAnimatedRef<Animated.ScrollView>();
   const positions = useSharedValue<Positions>(
@@ -47,7 +47,7 @@ const List = ({ children, editing, setEditting, onDragEnd }: ListProps) => {
             positions={positions}
             id={child.props.id}
             editing={editing}
-            setEditting={setEditting}
+            setEditing={setEditing}
             onDragEnd={onDragEnd}
             scrollView={scrollView}
             scrollY={scrollY}

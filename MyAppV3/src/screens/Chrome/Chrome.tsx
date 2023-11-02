@@ -41,12 +41,13 @@ const tiles = [
 ];
 
 const Chrome = () => {
-  const [editing, setEditting] = useState(false);
+  const [editing, setEditing] = useState(false);
+
   return (
     <SafeAreaView style={{ flex: 1, paddingHorizontal: MARGIN }}>
       <SortableList
         editing={editing}
-        setEditting={setEditting}
+        setEditing={setEditing}
         onDragEnd={positions => console.log(JSON.stringify(positions, null, 2))}
       >
         {tiles.map(tile => (
