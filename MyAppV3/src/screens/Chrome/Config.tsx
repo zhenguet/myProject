@@ -1,14 +1,14 @@
-import { Dimensions } from "react-native";
-import { Easing } from "react-native-reanimated";
+import { Dimensions } from 'react-native';
+import { Easing } from 'react-native-reanimated';
 
 export interface Positions {
   [id: string]: number;
 }
 
-const { width } = Dimensions.get("window");
+const { width } = Dimensions.get('window');
 export const MARGIN = 8;
-export const SIZE = width / 2 - MARGIN;
-export const COL = 2;
+export const COL = 4;
+export const SIZE = width / COL - MARGIN;
 
 export const animationConfig = {
   easing: Easing.inOut(Easing.ease),
@@ -16,7 +16,7 @@ export const animationConfig = {
 };
 
 export const getPosition = (position: number) => {
-  "worklet";
+  'worklet';
 
   return {
     x: position % COL === 0 ? 0 : SIZE * (position % COL),
@@ -25,7 +25,7 @@ export const getPosition = (position: number) => {
 };
 
 export const getOrder = (tx: number, ty: number, max: number) => {
-  "worklet";
+  'worklet';
 
   const x = Math.round(tx / SIZE) * SIZE;
   const y = Math.round(ty / SIZE) * SIZE;

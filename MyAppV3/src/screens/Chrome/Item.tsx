@@ -13,6 +13,7 @@ import Animated, {
 import {
   PanGestureHandler,
   PanGestureHandlerGestureEvent,
+  TouchableOpacity,
 } from 'react-native-gesture-handler';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -30,6 +31,7 @@ interface ItemProps {
   positions: Animated.SharedValue<Positions>;
   id: string;
   editing: boolean;
+  setEditting: any;
   onDragEnd: (diffs: Positions) => void;
   scrollView: RefObject<Animated.ScrollView>;
   scrollY: Animated.SharedValue<number>;
@@ -43,6 +45,7 @@ const Item = ({
   scrollView,
   scrollY,
   editing,
+  setEditting,
 }: ItemProps) => {
   const inset = useSafeAreaInsets();
   const containerHeight =
@@ -71,62 +74,55 @@ const Item = ({
   >({
     onStart: (_, ctx) => {
       // dont allow drag start if we're done editing
-      if (editing) {
-        ctx.x = translateX.value;
-        ctx.y = translateY.value;
-        isGestureActive.value = true;
-      }
+      ctx.x = translateX.value;
+      ctx.y = translateY.value;
+      isGestureActive.value = true;
     },
     onActive: ({ translationX, translationY }, ctx) => {
       // dont allow drag if we're done editing
-      if (editing) {
-        translateX.value = ctx.x + translationX;
-        translateY.value = ctx.y + translationY;
-        // 1. We calculate where the tile should be
-        const newOrder = getOrder(
-          translateX.value,
-          translateY.value,
-          Object.keys(positions.value).length - 1,
+      translateX.value = ctx.x + translationX;
+      translateY.value = ctx.y + translationY;
+      // 1. We calculate where the tile should be
+      const newOrder = getOrder(
+        translateX.value,
+        translateY.value,
+        Object.keys(positions.value).length - 1,
+      );
+
+      // 2. We swap the positions
+      const oldOlder = positions.value[id];
+      if (newOrder !== oldOlder) {
+        const idToSwap = Object.keys(positions.value).find(
+          key => positions.value[key] === newOrder,
         );
+        if (idToSwap) {
+          // Spread operator is not supported in worklets
+          // And Object.assign doesn't seem to be working on alpha.6
+          const newPositions = JSON.parse(JSON.stringify(positions.value));
+          newPositions[id] = newOrder;
+          newPositions[idToSwap] = oldOlder;
+          positions.value = newPositions;
+        }
+      }
 
-        // 2. We swap the positions
-        const oldOlder = positions.value[id];
-        if (newOrder !== oldOlder) {
-          const idToSwap = Object.keys(positions.value).find(
-            key => positions.value[key] === newOrder,
-          );
-          if (idToSwap) {
-            // Spread operator is not supported in worklets
-            // And Object.assign doesn't seem to be working on alpha.6
-            const newPositions = JSON.parse(JSON.stringify(positions.value));
-            newPositions[id] = newOrder;
-            newPositions[idToSwap] = oldOlder;
-            positions.value = newPositions;
-          }
-        }
-
-        // 3. Scroll up and down if necessary
-        const lowerBound = scrollY.value;
-        const upperBound = lowerBound + containerHeight - SIZE;
-        const maxScroll = contentHeight - containerHeight;
-        const leftToScrollDown = maxScroll - scrollY.value;
-        if (translateY.value < lowerBound) {
-          const diff = Math.min(lowerBound - translateY.value, lowerBound);
-          scrollY.value -= diff;
-          scrollTo(scrollView, 0, scrollY.value, false);
-          ctx.y -= diff;
-          translateY.value = ctx.y + translationY;
-        }
-        if (translateY.value > upperBound) {
-          const diff = Math.min(
-            translateY.value - upperBound,
-            leftToScrollDown,
-          );
-          scrollY.value += diff;
-          scrollTo(scrollView, 0, scrollY.value, false);
-          ctx.y += diff;
-          translateY.value = ctx.y + translationY;
-        }
+      // 3. Scroll up and down if necessary
+      const lowerBound = scrollY.value;
+      const upperBound = lowerBound + containerHeight - SIZE;
+      const maxScroll = contentHeight - containerHeight;
+      const leftToScrollDown = maxScroll - scrollY.value;
+      if (translateY.value < lowerBound) {
+        const diff = Math.min(lowerBound - translateY.value, lowerBound);
+        scrollY.value -= diff;
+        scrollTo(scrollView, 0, scrollY.value, false);
+        ctx.y -= diff;
+        translateY.value = ctx.y + translationY;
+      }
+      if (translateY.value > upperBound) {
+        const diff = Math.min(translateY.value - upperBound, leftToScrollDown);
+        scrollY.value += diff;
+        scrollTo(scrollView, 0, scrollY.value, false);
+        ctx.y += diff;
+        translateY.value = ctx.y + translationY;
       }
     },
     onEnd: () => {
@@ -136,11 +132,12 @@ const Item = ({
         runOnJS(onDragEnd)(positions.value);
       });
       translateY.value = withTiming(newPosition.y, animationConfig);
+      runOnJS(setEditting)(false);
     },
   });
   const style = useAnimatedStyle(() => {
-    const zIndex = isGestureActive.value ? 100 : 0;
-    const scale = withSpring(isGestureActive.value ? 1.05 : 1);
+    const zIndex = isGestureActive.value || editing ? 100 : 0;
+    const scale = withSpring(isGestureActive.value || editing ? 1.1 : 1);
     return {
       position: 'absolute',
       top: 0,
@@ -156,13 +153,15 @@ const Item = ({
     };
   });
   return (
-    <Animated.View style={style}>
-      <PanGestureHandler enabled={editing} onGestureEvent={onGestureEvent}>
-        <Animated.View style={StyleSheet.absoluteFill}>
-          {children}
-        </Animated.View>
-      </PanGestureHandler>
-    </Animated.View>
+    <TouchableOpacity onLongPress={() => setEditting(true)}>
+      <Animated.View style={style}>
+        <PanGestureHandler enabled={editing} onGestureEvent={onGestureEvent}>
+          <Animated.View style={StyleSheet.absoluteFill}>
+            {children}
+          </Animated.View>
+        </PanGestureHandler>
+      </Animated.View>
+    </TouchableOpacity>
   );
 };
 

@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
-
 import { MARGIN } from './Config';
-import Tile from './Tile';
 import SortableList from './SortableList';
+import { Text, View } from 'react-native';
 
 const tiles = [
   {
@@ -42,21 +41,29 @@ const tiles = [
 ];
 
 const Chrome = () => {
+  const [editing, setEditting] = useState(false);
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: 'black', paddingHorizontal: MARGIN }}
-    >
+    <SafeAreaView style={{ flex: 1, paddingHorizontal: MARGIN }}>
       <SortableList
-        editing={true}
+        editing={editing}
+        setEditting={setEditting}
         onDragEnd={positions => console.log(JSON.stringify(positions, null, 2))}
       >
         {tiles.map(tile => (
-          <Tile
-            onLongPress={() => true}
-            key={tile.id.toString()}
+          <View
             id={tile.id}
-            uri={tile.uri}
-          />
+            key={tile.id.toString()}
+            style={{
+              backgroundColor: '#FFFFFF',
+              flex: 1,
+              margin: MARGIN,
+              borderRadius: MARGIN,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+          >
+            <Text style={{ textAlign: 'center' }}>{tile.id}</Text>
+          </View>
         ))}
       </SortableList>
     </SafeAreaView>
