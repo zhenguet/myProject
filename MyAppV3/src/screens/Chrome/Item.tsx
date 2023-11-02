@@ -155,7 +155,10 @@ const Item = ({
   return (
     <TouchableOpacity onLongPress={() => setEditing(true)}>
       <Animated.View style={style}>
-        <PanGestureHandler enabled={editing} onGestureEvent={onGestureEvent}>
+        <PanGestureHandler
+          // enabled={editing}
+          onGestureEvent={onGestureEvent}
+        >
           <Animated.View style={StyleSheet.absoluteFill}>
             {children}
           </Animated.View>

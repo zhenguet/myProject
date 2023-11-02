@@ -55,7 +55,7 @@ const Chrome = () => {
             id={tile.id}
             key={tile.id.toString()}
             style={{
-              backgroundColor: '#FFFFFF',
+              backgroundColor: 'aqua',
               flex: 1,
               margin: MARGIN,
               borderRadius: MARGIN,
