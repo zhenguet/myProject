@@ -3,7 +3,7 @@ import { View, Text, StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   root: {
-    padding: 4,
+    padding: 2,
   },
   container: {
     padding: 8,
