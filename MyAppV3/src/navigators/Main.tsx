@@ -8,8 +8,8 @@ const Stack = createStackNavigator();
 const MainNavigator = () => {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="Chrome" component={Chrome} />
       <Stack.Screen name="Home" component={Example} />
+      <Stack.Screen name="Chrome" component={Chrome} />
       <Stack.Screen name="Draglist" component={Draglist} />
     </Stack.Navigator>
   );
