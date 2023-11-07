@@ -1,17 +1,11 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
-import React, { useRef, useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import {
   Dimensions,
   Pressable,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
-  TouchableOpacity,
+  Text,
   View,
   useColorScheme,
 } from 'react-native';
@@ -21,8 +15,6 @@ import {
   GestureHandlerRootView,
 } from 'react-native-gesture-handler';
 import Animated, {
-  Easing,
-  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
@@ -43,144 +35,145 @@ const words = [
   { id: 8, text: 'vi' },
   { id: 9, text: 'sô' },
   { id: 10, text: 'cẩu' },
+  { id: 11, text: 'Thiên' },
+  { id: 12, text: 'địa' },
+  { id: 13, text: 'bất' },
+  { id: 14, text: 'nhân' },
+  { id: 15, text: 'dĩ' },
+  { id: 16, text: 'vạn' },
+  { id: 17, text: 'vật' },
+  { id: 18, text: 'vi' },
+  { id: 19, text: 'sô' },
+  { id: 20, text: 'cẩu' },
 ];
 
-// const MARGIN_TOP = 20;
-const MARGIN_LEFT = 20;
 const { width, height } = Dimensions.get('window');
-const containerWidth = width - MARGIN_LEFT * 2;
+const INNER_MARGIN = 10;
 function App(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const backgroundStyle = {
     flex: 1,
     backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
   };
 
-  const panContainerLayout = useRef<any>();
-  const modalVisible = useSharedValue(false);
-  const openModal = () => {
-    modalVisible.value = true;
-  };
-  const closeModal = () => {
-    'worklet';
-    modalVisible.value = false;
-  };
-  const modalStyles = useAnimatedStyle(() => {
-    return {
-      top: withTiming(modalVisible.value ? 0 : height),
-    };
-  });
-
   const ready = useSharedValue(true);
+
+  // giá trị original để đánh dấu, sẽ chỉ cập nhật sau khi quá trình thả
   const offsets = words.map((item, index) => ({
-    originalOrder: useSharedValue(index),
-    order: useSharedValue(index),
-    width: useSharedValue(50),
-    height: useSharedValue(50),
-    x: useSharedValue((index % 4) * 55),
-    y: useSharedValue(Math.floor(index / 4) * 55),
-    originalX: useSharedValue((index % 4) * 55),
-    originalY: useSharedValue(Math.floor(index / 4) * 55),
+    originalOrder: useSharedValue(0),
+    order: useSharedValue(index), // thứ tự trong list
+    width: useSharedValue(0),
+    height: useSharedValue(0),
+    x: useSharedValue(0), // toạ độ phía trên cùng bên trái
+    y: useSharedValue(0), // toạ độ phía trên cùng bên trái
+    originalX: useSharedValue(0),
+    originalY: useSharedValue(0),
   }));
 
-  const onCheck = () => setSelectedItem(null);
+  const [loading, setLoading] = useState(true);
+  useLayoutEffect(() => {
+    if (!loading) {
+      // vòng lặp theo dòng
+      for (let gIndex = 0; gIndex < offsets.length / 4; gIndex++) {
+        const first = offsets[gIndex]; // phần tử đầu tiên của dòng
+        // set giá trị heiht của dòng bằng nhau, theo phần tử cao nhất
+        let maxHeight = first.height.value;
+        for (let i = 1; i < 4; i++) {
+          if (offsets[gIndex * 4 + i]) {
+            maxHeight = Math.max(
+              first.height.value,
+              offsets[gIndex * 4 + i].height.value,
+            );
+          }
+        }
+
+        // tính vị trí bắt đầu theo trục Y của dòng, trục X bắt đầu luôn là 0
+        let yValue = 0;
+        if (gIndex > 0) {
+          for (let i = 0; i < gIndex; i++) {
+            yValue += offsets[i * 4].height.value;
+          }
+        }
+
+        // set giá trị từng phần tử
+        for (let i = 0; i < 4; i++) {
+          if (offsets[gIndex * 4 + i]) {
+            const item = offsets[gIndex * 4 + i];
+            item.height.value = maxHeight;
+            item.x.value = item.width.value * i;
+            item.originalX.value = item.width.value * i;
+            item.y.value = yValue;
+            item.originalY.value = yValue;
+            item.originalOrder.value = gIndex * 4 + i;
+          }
+        }
+      }
+    }
+  }, [loading]);
 
   return (
-    <SafeAreaView style={backgroundStyle}>
+    <SafeAreaView
+      style={[
+        {
+          justifyContent: 'center',
+          alignItems: 'center',
+        },
+        backgroundStyle,
+      ]}
+    >
       <GestureHandlerRootView style={styles.container}>
-        <View
-          onLayout={({ nativeEvent: { layout } }) => {
-            panContainerLayout.current = layout;
-          }}
-          style={styles.panContainer}
-        />
-        <TouchableOpacity
-          onPress={openModal}
-          style={{ width: 50, height: 50, backgroundColor: 'green' }}
-        />
-        <Animated.View style={[styles.modalContainer, modalStyles]}>
-          <Pressable style={styles.modalBackdrop} onPress={closeModal} />
-          <View
-            style={styles.modalContent}
-            onStartShouldSetResponder={selectedItem && onCheck}
-          >
+        <View style={[styles.panContainer, { margin: INNER_MARGIN }]}>
+          <ScrollView style={{ height: 100 }}>
             <View
-              style={{
-                flexDirection: 'row',
-                flexWrap: 'wrap',
-                gap: 5,
-              }}
+              style={[styles.innerPanContainer]}
+              onLayout={() => setLoading(false)}
             >
+              {words.map((item, index) => (
+                <View
+                  style={[styles.itemWrap, { opacity: 0 }]}
+                  onLayout={({ nativeEvent: { layout } }) => {
+                    const offset = offsets[index];
+                    offset.width.value = layout.width + 5;
+                    offset.height.value = layout.height + 5;
+                  }}
+                  key={index}
+                >
+                  <Text style={styles.itemText}>{item.text}</Text>
+                </View>
+              ))}
+            </View>
+            <View style={{ position: 'absolute' }}>
               {words.map((item, index) => (
                 <Item
                   item={item}
-                  closeModal={closeModal}
                   offsets={offsets}
                   ready={ready}
                   index={index}
                   key={item.id}
-                  selectedItem={selectedItem}
-                  setSelectedItem={setSelectedItem}
                 />
               ))}
             </View>
-          </View>
-        </Animated.View>
+          </ScrollView>
+        </View>
       </GestureHandlerRootView>
     </SafeAreaView>
   );
 }
-const Item = ({
-  item,
-  closeModal,
-  ready,
-  offsets,
-  index,
-  selectedItem,
-  setSelectedItem,
-}: any) => {
-  const isLongPressed = useSharedValue(false);
+const Item = ({ item, ready, offsets, index }: any) => {
+  // phần tử hiện tại
   const offset = offsets[index];
 
-  const animatedStyles = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateX: isLongPressed.value
-            ? offset.x.value
-            : withTiming(offset.x.value, {
-                easing: Easing.inOut(Easing.ease),
-                duration: 350,
-              }),
-        },
-        {
-          translateY: isLongPressed.value
-            ? offset.y.value
-            : withTiming(offset.y.value, {
-                easing: Easing.inOut(Easing.ease),
-                duration: 350,
-              }),
-        },
-        { scale: withSpring(isLongPressed.value ? 1.2 : 1) },
-      ],
-      backgroundColor: ready.value
-        ? 'red'
-        : isLongPressed.value
-        ? 'gray'
-        : 'white',
-      zIndex: isLongPressed.value ? 100000 : 1,
-    };
-  });
+  // đánh dấu đang thao tác
+  const isSelected = useSharedValue(false);
 
-  const animatedText = useAnimatedStyle(() => {
-    return {
-      color: !ready.value && !isLongPressed.value ? 'gray' : 'white',
-    };
-  });
+  // hiển thị delete button
+  const isShowDelBtn = useSharedValue(false);
+
+  // lưu giá trị ban đầu của item với vị trí trên cùng của list
   const start = useSharedValue({ x: offset.x.value, y: offset.y.value });
 
+  /** trigger cập nhật giá trị theo `originalOrder` của tất cả các item khi kết thúc */
   useAnimatedReaction(
     () => {
       return offset.originalOrder.value;
@@ -194,161 +187,194 @@ const Item = ({
 
         offset.originalX.value = offset.x.value;
         offset.originalY.value = offset.y.value;
+        isShowDelBtn.value = false;
       }
     },
   );
 
+  // pan gesture
   const pan = Gesture.Pan()
-    .manualActivation(true)
-    .onTouchesMove((event, stateManager) => {
-      if (isLongPressed.value) {
-        stateManager.activate();
-      } else {
-        stateManager.fail();
-      }
+    .onStart(() => {
+      isSelected.value = true;
+      isShowDelBtn.value = true;
+      ready.value = false;
     })
     .onUpdate(e => {
-      runOnJS(setSelectedItem)(null);
-
+      isShowDelBtn.value = false;
+      // di chuyển item
       offset.x.value = e.translationX + start.value.x;
       offset.y.value = e.translationY + start.value.y;
+
       const newIndex = calPosition(offset, offsets);
+
       move(offset.originalOrder.value, newIndex, offsets);
     })
     .onFinalize(() => {
-      isLongPressed.value = false;
+      isSelected.value = false;
       ready.value = true;
-      const oldIndex = offset.originalOrder.value;
-      const newIndex = offset.order.value;
-      offsets.forEach((item: any) => {
-        let originalOrder = item.originalOrder.value;
-        if (originalOrder != oldIndex) {
-          if (
-            (originalOrder <= newIndex &&
-              originalOrder > oldIndex &&
-              newIndex > oldIndex) ||
-            (originalOrder >= newIndex &&
-              originalOrder < oldIndex &&
-              newIndex < oldIndex)
-          ) {
-            if (originalOrder < oldIndex) {
-              originalOrder += 1;
-            } else {
-              originalOrder -= 1;
-            }
-          }
-          item.originalOrder.value = originalOrder;
-        }
-      });
-      offset.originalOrder.value = newIndex;
-      offset.x.value = (newIndex % 4) * 55;
-      offset.y.value = Math.floor(newIndex / 4) * 55;
-      // console.log(offsets);
+
+      setPosition(offset, offsets);
     });
+  pan.config = { activateAfterLongPress: 500, minDist: 10 };
 
-  const longPress = Gesture.LongPress()
-    .minDuration(350)
-    .onStart(() => {
-      isLongPressed.value = true;
-      runOnJS(setSelectedItem)(item);
-      ready.value = false;
-    });
-  // .onEnd(() => {
-  //   isLongPressed.value = false;
-  // });
+  const animatedStyles = useAnimatedStyle(() => {
+    return {
+      transform: [
+        {
+          translateX: isSelected.value
+            ? offset.x.value
+            : withTiming(offset.x.value, { duration: 200 }),
+        },
+        {
+          translateY: isSelected.value
+            ? offset.y.value
+            : withTiming(offset.y.value, { duration: 200 }),
+        },
+        { scale: withSpring(isSelected.value ? 1.2 : 1) },
+      ],
+      backgroundColor: ready.value
+        ? 'red'
+        : isSelected.value
+        ? 'gray'
+        : 'white',
+      zIndex: isSelected.value ? 100000 : 1,
+    };
+  });
 
-  const composed = Gesture.Simultaneous(pan, longPress);
+  const animatedText = useAnimatedStyle(() => {
+    return {
+      color: !ready.value && !isSelected.value ? 'gray' : 'white',
+    };
+  });
 
+  const animatedDelBtn = useAnimatedStyle(() => ({
+    display: isShowDelBtn.value ? 'flex' : 'none',
+  }));
   return (
-    <GestureDetector gesture={composed}>
-      <Animated.View style={[styles.itemWrap, animatedStyles]}>
+    <GestureDetector gesture={pan}>
+      <Animated.View
+        style={[styles.itemWrap, { position: 'absolute' }, animatedStyles]}
+      >
         <Animated.Text style={[styles.itemText, animatedText]}>
-          {item.id}
+          {item.text}
         </Animated.Text>
-
-        {selectedItem?.id === item.id && (
-          <Pressable
-            onPress={() => {
-              setSelectedItem(null);
-              console.log(item);
-            }}
-            style={{
-              position: 'absolute',
-              top: -50,
-              width: width * 0.6,
-              backgroundColor: 'aqua',
-              justifyContent: 'center',
-              alignItems: 'center',
-              zIndex: 100000,
-              padding: 8,
-              borderRadius: 5,
-            }}
-          >
-            <Animated.Text>Thêm vào danh sách yêu thích</Animated.Text>
-          </Pressable>
-        )}
+        <Pressable style={{ position: 'absolute' }}>
+          <Animated.View
+            style={[
+              {
+                width: 10,
+                height: 10,
+                backgroundColor: 'white',
+                borderRadius: 10,
+              },
+              animatedDelBtn,
+            ]}
+          ></Animated.View>
+        </Pressable>
       </Animated.View>
     </GestureDetector>
   );
 };
 
+/** tính index tương đối của phần tử đang thao tác */
 const calPosition = (offset: any, offsets: Array<any>) => {
   'worklet';
+
+  // sắp xếp theo order
   const _offsets = [...offsets].sort(
-    (first, second) => first.originalX.value - second.originalX.value,
+    (first, second) => first.originalOrder.value - second.originalOrder.value,
   );
 
+  const x = offset.x.value;
+  const y = offset.y.value;
+  const width = offset.width.value;
+  const height = offset.height.value;
+
+  // tìm phần tử đầu tiên trong list có thể đảo vị trí
   let _offset = _offsets.find(
     os =>
       (between(
-        offset.x.value,
+        x + width / 4,
         os.originalX.value,
         os.originalX.value + os.width.value,
       ) ||
         between(
-          offset.x.value + offset.width.value,
+          x + (width * 3) / 4,
           os.originalX.value,
           os.originalX.value + os.width.value,
         )) &&
       (between(
-        offset.y.value,
+        y + height / 4,
         os.originalY.value,
         os.originalY.value + os.height.value,
       ) ||
         between(
-          offset.y.value + offset.height.value,
+          y + (height * 3) / 4,
           os.originalY.value,
           os.originalY.value + os.height.value,
         )),
   );
-  if (!_offset) {
+
+  // nếu ko có thì tìm phần tử đầu tiên trong hàng có thể đảo vị trí
+  if (!_offset)
     _offset = _offsets.find(
       os =>
-        offset.x.value < os.originalX.value &&
-        between(
-          offset.y.value,
-          os.originalY.value,
-          os.originalY.value + os.height.value,
-        ),
+        x < os.originalX.value &&
+        between(y, os.originalY.value, os.originalY.value + os.height.value),
     );
-  }
 
   if (_offset) return _offset.originalOrder.value;
 
-  if (
-    offset.x.value < _offsets[0].originalX.value &&
-    offset.y.value < _offsets[0].originalY.value
-  )
+  // nếu ko có thì xem item đã di chuyển ra đầu danh sách chưa => index = 0
+  if (x < _offsets[0].originalX.value && y < _offsets[0].originalY.value)
     return 0;
 
+  // ko hợp lệ xếp về cuối
   return _offsets.length - 1;
 };
 
+/** di chuyển các phần tử khác */
 const move = (oldIndex: number, newIndex: number, offsets: Array<any>) => {
   'worklet';
   const selecting = offsets.find(x => x.originalOrder.value === oldIndex);
+  // cập nhật order hiện tại
   selecting.order.value = newIndex;
+
   offsets.forEach(item => {
+    let originalOrder = item.originalOrder.value;
+    // cập nhật order và toạ độ các điểm khác
+    if (originalOrder != oldIndex) {
+      // những phần tử nằm giữa newIndex và oldIndex là bị thay đổi order
+      if (
+        (originalOrder <= newIndex &&
+          originalOrder > oldIndex &&
+          newIndex > oldIndex) ||
+        (originalOrder >= newIndex &&
+          originalOrder < oldIndex &&
+          newIndex < oldIndex)
+      ) {
+        if (originalOrder < oldIndex) {
+          originalOrder += 1;
+        } else {
+          originalOrder -= 1;
+        }
+      }
+
+      // cập nhật vị trí tất cả
+      item.x.value = (originalOrder % 4) * item.width.value;
+      item.y.value = Math.floor(originalOrder / 4) * item.height.value;
+    }
+  });
+};
+
+/** cập nhật giá trị tất cả */
+const setPosition = (offset: any, offsets: Array<any>) => {
+  'worklet';
+  const oldIndex = offset.originalOrder.value;
+  const newIndex = offset.order.value;
+
+  // cập nhật original cho các phần tử khác
+  offsets.forEach((item: any) => {
     let originalOrder = item.originalOrder.value;
     if (originalOrder != oldIndex) {
       if (
@@ -365,11 +391,17 @@ const move = (oldIndex: number, newIndex: number, offsets: Array<any>) => {
           originalOrder -= 1;
         }
       }
-      // item.originalOrder.value = originalOrder;
-      item.x.value = (originalOrder % 4) * 55;
-      item.y.value = Math.floor(originalOrder / 4) * 55;
+      item.order.value = originalOrder;
+      item.originalOrder.value = originalOrder;
     }
   });
+
+  // cập nhật giá trị cho phần tử hiện tại
+  offset.originalOrder.value = newIndex;
+  offset.x.value = (newIndex % 4) * offset.width.value;
+  offset.y.value = Math.floor(newIndex / 4) * offset.height.value;
+  offset.originalX.value = (newIndex % 4) * offset.width.value;
+  offset.originalY.value = Math.floor(newIndex / 4) * offset.height.value;
 };
 
 const styles = StyleSheet.create({
@@ -391,37 +423,26 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-  },
-  itemWrap: {
-    height: 40,
-    width: 40,
+    height: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 20,
-    backgroundColor: 'white',
+  },
+  itemWrap: {
+    backgroundColor: 'red',
+    padding: 5,
+    width: width / 6 - 10,
     borderWidth: 1,
-    borderColor: 'gray',
-    position: 'absolute',
-    margin: 5,
   },
   itemText: {
-    fontSize: 20,
-  },
-  panContainer: {
-    backgroundColor: 'yellow',
-    padding: 5,
-    borderWidth: 1,
-    borderColor: 'gray',
-    borderRadius: 5,
-    marginHorizontal: MARGIN_LEFT,
-    width: containerWidth,
-    minHeight: 100,
+    textAlign: 'center',
+    color: 'white',
   },
   modalContainer: {
     position: 'absolute',
     width,
     height,
     left: 0,
+    top: 0,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -429,13 +450,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width,
     height,
-    backgroundColor: '#000',
-    opacity: 0.3,
+    // backgroundColor: "#000",
+    // opacity: 0.3,
   },
-  modalContent: {
-    width: 220,
-    height: 400,
+  panContainer: {
+    width: (width * 2) / 3,
     backgroundColor: 'white',
+  },
+  innerPanContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 5,
+    alignItems: 'center',
   },
 });
 
