@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import {
   Dimensions,
   SafeAreaView,
@@ -43,13 +43,15 @@ const words = [
 
 const itemPerPage = 12;
 
-const images = Array.from(Array(Math.ceil(words.length / itemPerPage)).keys());
+const pages = Array.from(Array(Math.ceil(words.length / itemPerPage)).keys());
 
 const { width, height } = Dimensions.get('window');
 const containerWidth = width * 0.75;
 const INNER_MARGIN = 10;
+
 function Eup(): JSX.Element {
   const isDarkMode = useColorScheme() === 'dark';
+  const scrollRef: any = React.useRef(null);
 
   const backgroundStyle = {
     flex: 1,
@@ -137,13 +139,14 @@ function Eup(): JSX.Element {
         <View style={[styles.panContainer, { margin: INNER_MARGIN }]}>
           <View style={styles.scrollContainer}>
             <Animated.ScrollView
+              ref={scrollRef}
               onScroll={scrollHandler}
               pagingEnabled
               scrollEventThrottle={16}
               horizontal
               showsHorizontalScrollIndicator={false}
             >
-              {images.map((image, imageIndex) => {
+              {pages.map((image, imageIndex) => {
                 const from = itemPerPage * imageIndex;
                 const to = from + itemPerPage;
 
@@ -176,6 +179,7 @@ function Eup(): JSX.Element {
                             ready={ready}
                             index={index}
                             key={item.id}
+                            scrollRef={scrollRef}
                           />
                         ))}
                       </View>
@@ -185,7 +189,7 @@ function Eup(): JSX.Element {
               })}
             </Animated.ScrollView>
             <View style={styles.indicatorContainer}>
-              {images.map((image, imageIndex) => {
+              {pages.map((image, imageIndex) => {
                 return (
                   <Dot
                     key={`${image}_${imageIndex}`}

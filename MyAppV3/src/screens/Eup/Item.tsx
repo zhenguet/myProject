@@ -1,5 +1,5 @@
 import React from 'react';
-import { Pressable } from 'react-native';
+import { Pressable, Dimensions } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
   useAnimatedReaction,
@@ -7,11 +7,15 @@ import Animated, {
   useSharedValue,
   withSpring,
   withTiming,
+  runOnJS,
 } from 'react-native-reanimated';
 import { styles } from './Eup';
 import { calPosition, move, setPosition } from './Layout';
+const { width, height } = Dimensions.get('window');
 
-const Item = ({ item, ready, offsets, index }: any) => {
+const containerWidth = width * 0.75;
+
+const Item = ({ item, ready, offsets, index, scrollRef }: any) => {
   // phần tử hiện tại
   const offset = offsets[index];
 
@@ -43,6 +47,14 @@ const Item = ({ item, ready, offsets, index }: any) => {
     },
   );
 
+  const onHandleScroll = (options: {
+    x?: number;
+    y?: number;
+    animated?: boolean;
+  }) => {
+    scrollRef.current.scrollTo(options);
+  };
+
   // pan gesture
   const pan = Gesture.Pan()
     .onStart(() => {
@@ -59,6 +71,10 @@ const Item = ({ item, ready, offsets, index }: any) => {
       const newIndex = calPosition(offset, offsets);
 
       move(offset.originalOrder.value, newIndex, offsets);
+
+      if (offset.x.value < 0) {
+        runOnJS(onHandleScroll)({ x: 0, y: 0, animated: true });
+      }
     })
     .onFinalize(() => {
       isSelected.value = false;
