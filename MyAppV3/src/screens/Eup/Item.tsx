@@ -76,11 +76,11 @@ const Item = ({ item, ready, offsets, index, scrollRef }: any) => {
       move(offset.originalOrder.value, newIndex, offsets);
 
       if (offset.x.value < 0) {
-        runOnJS(onHandleScroll)({ x: 0, animated: false });
+        runOnJS(onHandleScroll)({ x: 0, y: 0, animated: true });
       }
 
       if (offset.x.value > containerWidth - itemWidth) {
-        runOnJS(onHandleScroll)({ x: containerWidth, animated: false });
+        runOnJS(onHandleScroll)({ x: containerWidth, y: 0, animated: true });
       }
     })
     .onFinalize(() => {
