@@ -1,7 +1,8 @@
 import { between } from 'react-native-redash';
 
+const itemPerRow = 3;
 /** tính index tương đối của phần tử đang thao tác */
-export const calPosition = (offset: any, offsets: Array<any>) => {
+export const calIndex = (offset: any, offsets: Array<any>) => {
   'worklet';
 
   // sắp xếp theo order
@@ -12,7 +13,7 @@ export const calPosition = (offset: any, offsets: Array<any>) => {
   const x = offset.x.value;
   const y = offset.y.value;
   const width = offset.width.value;
-  const height = offset.height.value;
+  const height = offset.rowHeight.value;
 
   // tìm phần tử đầu tiên trong list có thể đảo vị trí
   let _offset = _offsets.find(
@@ -61,6 +62,62 @@ export const calPosition = (offset: any, offsets: Array<any>) => {
   return _offsets.length - 1;
 };
 
+/**Tính vị trí {x, y} của tất cả phần tử
+ * Nếu có ignoreIndex tức là đang trong quá trình kéo, sẽ bỏ qua phần tử đang kéo và ko set giá trị original
+ */
+export const calPosition = (offsets: Array<any>, ignoreIndex?: number) => {
+  'worklet';
+  for (let gIndex = 0; gIndex < offsets.length / itemPerRow; gIndex++) {
+    // tính vị trí bắt đầu theo trục Y của dòng, trục X bắt đầu luôn là 0
+    let yValue = 0;
+    if (gIndex > 0) {
+      for (let i = 0; i < gIndex; i++) {
+        const first = offsets[i * itemPerRow]; // phần tử đầu tiên của dòng
+        // set giá trị height của dòng bằng nhau, theo phần tử cao nhất
+        let maxHeight = first.height.value;
+        for (let j = 1; j < itemPerRow; j++) {
+          if (offsets[i * itemPerRow + j]) {
+            maxHeight = Math.max(
+              maxHeight,
+              offsets[i * itemPerRow + j].height.value,
+            );
+          }
+        }
+        yValue += maxHeight;
+      }
+    }
+
+    const first = offsets[gIndex * itemPerRow]; // phần tử đầu tiên của dòng
+    // set giá trị heiht của dòng bằng nhau, theo phần tử cao nhất
+    let maxHeight = first.height.value;
+    for (let j = 1; j < itemPerRow; j++) {
+      if (offsets[gIndex * itemPerRow + j]) {
+        maxHeight = Math.max(
+          maxHeight,
+          offsets[gIndex * itemPerRow + j].height.value,
+        );
+      }
+    }
+
+    // set giá trị từng phần tử
+    for (let i = 0; i < itemPerRow; i++) {
+      if (offsets[gIndex * itemPerRow + i]) {
+        const item = offsets[gIndex * itemPerRow + i];
+        if (ignoreIndex && item.originalOrder.value === ignoreIndex) {
+          continue;
+        }
+        item.rowHeight.value = maxHeight;
+        item.x.value = item.width.value * i;
+        item.y.value = yValue;
+        if (!ignoreIndex) {
+          item.originalY.value = yValue;
+          item.originalX.value = item.width.value * i;
+          item.originalOrder.value = item.order.value;
+        }
+      }
+    }
+  }
+};
 /** di chuyển các phần tử khác */
 export const move = (
   oldIndex: number,
@@ -68,35 +125,35 @@ export const move = (
   offsets: Array<any>,
 ) => {
   'worklet';
+
   const selecting = offsets.find(x => x.originalOrder.value === oldIndex);
   // cập nhật order hiện tại
   selecting.order.value = newIndex;
 
   offsets.forEach(item => {
-    let originalOrder = item.originalOrder.value;
+    let order = item.originalOrder.value;
     // cập nhật order và toạ độ các điểm khác
-    if (originalOrder !== oldIndex) {
+    if (order != oldIndex) {
       // những phần tử nằm giữa newIndex và oldIndex là bị thay đổi order
       if (
-        (originalOrder <= newIndex &&
-          originalOrder > oldIndex &&
-          newIndex > oldIndex) ||
-        (originalOrder >= newIndex &&
-          originalOrder < oldIndex &&
-          newIndex < oldIndex)
+        (order <= newIndex && order > oldIndex && newIndex > oldIndex) ||
+        (order >= newIndex && order < oldIndex && newIndex < oldIndex)
       ) {
-        if (originalOrder < oldIndex) {
-          originalOrder += 1;
+        if (order < oldIndex) {
+          order += 1;
         } else {
-          originalOrder -= 1;
+          order -= 1;
         }
       }
-
-      // cập nhật vị trí tất cả
-      item.x.value = (originalOrder % 4) * item.width.value;
-      item.y.value = Math.floor(originalOrder / 4) * item.height.value;
+      item.order.value = order;
     }
   });
+
+  const _offsets = [...offsets].sort(
+    (first, second) => first.order.value - second.order.value,
+  );
+
+  calPosition(_offsets, oldIndex);
 };
 
 /** cập nhật giá trị tất cả */
@@ -128,10 +185,9 @@ export const setPosition = (offset: any, offsets: Array<any>) => {
     }
   });
 
-  // cập nhật giá trị cho phần tử hiện tại
   offset.originalOrder.value = newIndex;
-  offset.x.value = (newIndex % 4) * offset.width.value;
-  offset.y.value = Math.floor(newIndex / 4) * offset.height.value;
-  offset.originalX.value = (newIndex % 4) * offset.width.value;
-  offset.originalY.value = Math.floor(newIndex / 4) * offset.height.value;
+  const _offsets = [...offsets].sort(
+    (first, second) => first.originalOrder.value - second.originalOrder.value,
+  );
+  calPosition(_offsets);
 };

@@ -1,16 +1,16 @@
 import React from 'react';
-import { Pressable, Dimensions } from 'react-native';
+import { Dimensions, Pressable } from 'react-native';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import Animated, {
+  runOnJS,
   useAnimatedReaction,
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   withTiming,
-  runOnJS,
 } from 'react-native-reanimated';
 import { styles } from './Eup';
-import { calPosition, move, setPosition } from './Layout';
+import { calIndex, move, setPosition } from './Layout';
 const { width } = Dimensions.get('window');
 
 const containerWidth = width * 0.75;
@@ -81,7 +81,7 @@ const Item = ({ item, ready, offsets, index, scrollRef, translateX }: any) => {
       offset.x.value = e.translationX + start.value.x;
       offset.y.value = e.translationY + start.value.y;
 
-      const newIndex = calPosition(offset, offsets);
+      const newIndex = calIndex(offset, offsets);
 
       move(offset.originalOrder.value, newIndex, offsets);
 
@@ -106,7 +106,6 @@ const Item = ({ item, ready, offsets, index, scrollRef, translateX }: any) => {
 
       setPosition(offset, offsets);
     });
-
   pan.config = { activateAfterLongPress: 500, minDist: 10 };
 
   const animatedStyles = useAnimatedStyle(() => {

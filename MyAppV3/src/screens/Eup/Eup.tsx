@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useState } from 'react';
+import React, { useLayoutEffect, useState } from 'react';
 import {
   Dimensions,
   SafeAreaView,
@@ -17,6 +17,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Colors } from 'react-native/Libraries/NewAppScreen';
 import Item from './Item';
+import { calPosition } from './Layout';
 
 const words = [
   { id: 1, text: 'Thiên1' },
@@ -29,7 +30,7 @@ const words = [
   { id: 8, text: 'vi1' },
   { id: 9, text: 'sô1' },
   { id: 10, text: 'cẩu1' },
-  { id: 11, text: 'Thiên2' },
+  { id: 11, text: 'Thiên Thiên' },
   { id: 12, text: 'địa2' },
   { id: 13, text: 'bất2' },
   { id: 14, text: 'nhân2' },
@@ -39,7 +40,7 @@ const words = [
   { id: 18, text: 'vi2' },
   { id: 19, text: 'sô2' },
   { id: 20, text: 'cẩu2' },
-  { id: 21, text: 'Thiên3' },
+  { id: 21, text: 'Thiên Thiên Thiên' },
   { id: 22, text: 'địa3' },
   { id: 23, text: 'bất3' },
   { id: 24, text: 'nhân3' },
@@ -71,12 +72,13 @@ function Eup(): JSX.Element {
   const ready = useSharedValue(true);
   const translateX = useSharedValue(0);
 
-  // giá trị original để đánh dấu, sẽ chỉ cập nhật sau khi quá trình thả
+  //giá trị original để đánh dấu, sẽ chỉ cập nhật sau khi quá trình thả
   const offsets = words.map((item, index) => ({
     originalOrder: useSharedValue(0),
     order: useSharedValue(index), // thứ tự trong list
     width: useSharedValue(0),
     height: useSharedValue(0),
+    rowHeight: useSharedValue(0),
     x: useSharedValue(0), // toạ độ phía trên cùng bên trái
     y: useSharedValue(0), // toạ độ phía trên cùng bên trái
     originalX: useSharedValue(0),
@@ -85,43 +87,7 @@ function Eup(): JSX.Element {
 
   const [loading, setLoading] = useState(true);
   useLayoutEffect(() => {
-    if (!loading) {
-      // vòng lặp theo dòng
-      for (let gIndex = 0; gIndex < offsets.length / 3; gIndex++) {
-        const first = offsets[gIndex]; // phần tử đầu tiên của dòng
-        // set giá trị heiht của dòng bằng nhau, theo phần tử cao nhất
-        let maxHeight = first.height.value;
-        for (let i = 1; i < 3; i++) {
-          if (offsets[gIndex * 3 + i]) {
-            maxHeight = Math.max(
-              first.height.value,
-              offsets[gIndex * 3 + i].height.value,
-            );
-          }
-        }
-
-        // tính vị trí bắt đầu theo trục Y của dòng, trục X bắt đầu luôn là 0
-        let yValue = 0;
-        if (gIndex > 0) {
-          for (let i = 0; i < gIndex; i++) {
-            yValue += offsets[i * 3].height.value;
-          }
-        }
-
-        // set giá trị từng phần tử
-        for (let i = 0; i < 3; i++) {
-          if (offsets[gIndex * 3 + i]) {
-            const item = offsets[gIndex * 3 + i];
-            item.height.value = maxHeight;
-            item.x.value = item.width.value * i;
-            item.originalX.value = item.width.value * i;
-            item.y.value = yValue;
-            item.originalY.value = yValue;
-            item.originalOrder.value = gIndex * 3 + i;
-          }
-        }
-      }
-    }
+    if (!loading) calPosition(offsets);
   }, [loading]);
 
   const scrollHandler = useAnimatedScrollHandler(
