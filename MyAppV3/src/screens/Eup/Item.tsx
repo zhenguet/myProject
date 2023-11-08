@@ -75,7 +75,7 @@ const Item = ({ item, ready, offsets, index, scrollRef, translateX }: any) => {
 
       move(offset.originalOrder.value, newIndex, offsets);
 
-      if (offset.x.value < 0 && translateX.value > 0) {
+      if (offset.x.value < -itemWidth / 2 && translateX.value > 0) {
         runOnJS(onHandleScroll)({
           x:
             (Math.round(translateX.value / containerWidth) - 1) *
@@ -103,6 +103,7 @@ const Item = ({ item, ready, offsets, index, scrollRef, translateX }: any) => {
 
       setPosition(offset, offsets);
     });
+
   pan.config = { activateAfterLongPress: 500, minDist: 10 };
 
   const animatedStyles = useAnimatedStyle(() => {
