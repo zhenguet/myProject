@@ -21,6 +21,7 @@ const itemWidth = containerWidth / 4 - INNER_MARGIN;
 const Item = ({ item, ready, offsets, index, scrollRef, translateX }: any) => {
   // phần tử hiện tại
   const offset = offsets[index];
+  const actionTime = useSharedValue<any>(null);
 
   // đánh dấu đang thao tác
   const isSelected = useSharedValue(false);
@@ -50,12 +51,21 @@ const Item = ({ item, ready, offsets, index, scrollRef, translateX }: any) => {
     },
   );
 
-  const onHandleScroll = (options: {
-    x?: number;
-    y?: number;
-    animated?: boolean;
-  }) => {
-    scrollRef.current.scrollTo(options);
+  const onHandleScroll = (x: number) => {
+    const now = new Date().getTime();
+
+    if (actionTime.value) {
+      if (now - actionTime.value > 1000) {
+        scrollRef.current.scrollTo({
+          x,
+          y: 0,
+          animated: true,
+        });
+        actionTime.value = null;
+      }
+    } else {
+      actionTime.value = now;
+    }
   };
 
   // pan gesture
@@ -75,26 +85,19 @@ const Item = ({ item, ready, offsets, index, scrollRef, translateX }: any) => {
 
       move(offset.originalOrder.value, newIndex, offsets);
 
-      if (offset.x.value < -itemWidth / 2 && translateX.value > 0) {
-        runOnJS(onHandleScroll)({
-          x:
-            (Math.round(translateX.value / containerWidth) - 1) *
-            containerWidth,
-          y: 0,
-          animated: true,
-        });
+      if (offset.x.value < -itemWidth / 2) {
+        runOnJS(onHandleScroll)(
+          (Math.round(translateX.value / containerWidth) - 1) * containerWidth,
+        );
       }
 
       if (offset.x.value > containerWidth - itemWidth) {
-        runOnJS(onHandleScroll)({
-          x:
-            translateX.value > 0
-              ? (Math.round(translateX.value / containerWidth) + 1) *
+        runOnJS(onHandleScroll)(
+          translateX.value > 0
+            ? (Math.round(translateX.value / containerWidth) + 1) *
                 containerWidth
-              : containerWidth,
-          y: 0,
-          animated: true,
-        });
+            : containerWidth,
+        );
       }
     })
     .onFinalize(() => {
