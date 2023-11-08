@@ -14,6 +14,9 @@ import { calPosition, move, setPosition } from './Layout';
 const { width, height } = Dimensions.get('window');
 
 const containerWidth = width * 0.75;
+const INNER_MARGIN = 10;
+
+const itemWidth = containerWidth / 4 - INNER_MARGIN;
 
 const Item = ({ item, ready, offsets, index, scrollRef }: any) => {
   // phần tử hiện tại
@@ -73,7 +76,11 @@ const Item = ({ item, ready, offsets, index, scrollRef }: any) => {
       move(offset.originalOrder.value, newIndex, offsets);
 
       if (offset.x.value < 0) {
-        runOnJS(onHandleScroll)({ x: 0, y: 0, animated: true });
+        runOnJS(onHandleScroll)({ x: 0, animated: false });
+      }
+
+      if (offset.x.value > containerWidth - itemWidth) {
+        runOnJS(onHandleScroll)({ x: containerWidth, animated: false });
       }
     })
     .onFinalize(() => {
