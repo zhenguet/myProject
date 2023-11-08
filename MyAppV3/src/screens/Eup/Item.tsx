@@ -11,14 +11,14 @@ import Animated, {
 } from 'react-native-reanimated';
 import { styles } from './Eup';
 import { calPosition, move, setPosition } from './Layout';
-const { width, height } = Dimensions.get('window');
+const { width } = Dimensions.get('window');
 
 const containerWidth = width * 0.75;
 const INNER_MARGIN = 10;
 
 const itemWidth = containerWidth / 4 - INNER_MARGIN;
 
-const Item = ({ item, ready, offsets, index, scrollRef }: any) => {
+const Item = ({ item, ready, offsets, index, scrollRef, translateX }: any) => {
   // phần tử hiện tại
   const offset = offsets[index];
 
@@ -75,12 +75,26 @@ const Item = ({ item, ready, offsets, index, scrollRef }: any) => {
 
       move(offset.originalOrder.value, newIndex, offsets);
 
-      if (offset.x.value < 0) {
-        runOnJS(onHandleScroll)({ x: 0, y: 0, animated: true });
+      if (offset.x.value < 0 && translateX.value > 0) {
+        runOnJS(onHandleScroll)({
+          x:
+            (Math.round(translateX.value / containerWidth) - 1) *
+            containerWidth,
+          y: 0,
+          animated: true,
+        });
       }
 
       if (offset.x.value > containerWidth - itemWidth) {
-        runOnJS(onHandleScroll)({ x: containerWidth, y: 0, animated: true });
+        runOnJS(onHandleScroll)({
+          x:
+            translateX.value > 0
+              ? (Math.round(translateX.value / containerWidth) + 1) *
+                containerWidth
+              : containerWidth,
+          y: 0,
+          animated: true,
+        });
       }
     })
     .onFinalize(() => {

@@ -180,6 +180,7 @@ function Eup(): JSX.Element {
                             index={index}
                             key={item.id}
                             scrollRef={scrollRef}
+                            translateX={translateX}
                           />
                         ))}
                       </View>
